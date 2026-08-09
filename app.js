@@ -99,13 +99,14 @@ function openView(name) {
 }
 
 const metricInfo = {
-  turnout_pct: ['Turnout', '%'], winner_vote_pct: ['Winner vote share', '%'],
-  margin_pct_points: ['Winning margin', ' pp'], rejected_ballots_pct: ['Rejected ballots', '%']
+  turnout: 'Votes polled',
+  registered_electors: 'Registered electors',
+  rejected_ballots: 'Rejected ballots'
 };
 function drawOverview() {
   const year = Number(document.getElementById('overviewYear').value);
   const metric = document.getElementById('overviewMetric').value;
-  const [label, suffix] = metricInfo[metric];
+  const label = metricInfo[metric];
   const rows = dashboard.overview.filter(row => row.year === year);
   const plotRows = rows.filter(row => row[metric] !== null && row[metric] !== undefined && Number.isFinite(Number(row.constituency_no)) && Number.isFinite(Number(row[metric])));
   document.getElementById('scatterTag').textContent = `${year} · ${label}`;
@@ -119,26 +120,17 @@ function drawOverview() {
     x: plotRows.map(row=>Number(row.constituency_no)), y: plotRows.map(row=>Number(row[metric])), type:'scatter', mode:'markers',
     marker:{size:10, color:plotRows.map(row=>colorForParty(row.winner_party_group)), opacity:.84, line:{color:'#fffdf6',width:1}},
     customdata: plotRows.map(row=>[row.constituency_label,row.winner_candidate,row.winner_party_group,row.runner_up_candidate]),
-    hovertemplate:`<b>%{customdata[0]}</b><br>${label}: %{y:.2f}${suffix}<br>Winner: %{customdata[1]} (%{customdata[2]})<br>Runner-up: %{customdata[3]}<extra></extra>`
-  }], {...baseLayout, datarevision:`overview-${year}-${metric}`, xaxis:{...baseLayout.xaxis,type:'linear',autorange:true,title:'Current constituency number',dtick:10}, yaxis:{...baseLayout.yaxis,type:'linear',autorange:true,title:`${label}${suffix==='%'?' (%)':''}`}}, plotConfig);
+    hovertemplate:`<b>%{customdata[0]}</b><br>${label}: %{y:,.0f}<br>Winner: %{customdata[1]} (%{customdata[2]})<br>Runner-up: %{customdata[3]}<extra></extra>`
+  }], {...baseLayout, datarevision:`overview-${year}-${metric}`, xaxis:{...baseLayout.xaxis,type:'linear',autorange:true,title:'Current constituency number',dtick:10}, yaxis:{...baseLayout.yaxis,type:'linear',autorange:true,tickformat:',.0f',title:`${label} (count)`}}, plotConfig);
 
-  const topRowsByYear = new Map(dashboard.meta.years.map(electionYear=>[
-    electionYear,
-    dashboard.seat_counts.filter(row=>row.year===electionYear).sort((a,b)=>a.rank-b.rank)
-  ]));
-  const legendParties = new Set();
-  const seatTraces = [];
-  dashboard.meta.years.forEach(electionYear=>topRowsByYear.get(electionYear).forEach(row=>{
-    const showLegend=!legendParties.has(row.party);
-    legendParties.add(row.party);
-    seatTraces.push({
-      x:[electionYear],y:[row.seats],type:'bar',name:row.party,legendgroup:row.party,showlegend:showLegend,
-      marker:{color:colorForParty(row.party)},text:[`${row.party}<br>${row.seats}`],customdata:[[row.result_stage,row.classification_note]],
-      textposition:'inside',insidetextanchor:'middle',
-      hovertemplate:`<b>${row.party}</b><br>%{x}: %{y} general seats<br>Rank ${row.rank}<br>%{customdata[0]}<br>%{customdata[1]}<extra></extra>`
-    });
-  }));
-  Plotly.react('seatCounts',seatTraces,{...baseLayout,barmode:'stack',bargap:.3,uniformtext:{minsize:9,mode:'hide'},xaxis:{...baseLayout.xaxis,type:'linear',tickmode:'array',tickvals:dashboard.meta.years},yaxis:{...baseLayout.yaxis,type:'linear',title:'Declared general seats (top seven + ties)'},legend:{orientation:'h',y:1.18,x:0,traceorder:'normal'}},plotConfig);
+  const seatRows = dashboard.seat_counts.filter(row=>row.year===year).sort((a,b)=>b.seats-a.seats || a.party.localeCompare(b.party));
+  document.getElementById('seatChartYear').textContent = year;
+  Plotly.react('seatCounts',[{
+    x:seatRows.map(row=>row.seats),y:seatRows.map(row=>row.party),type:'bar',orientation:'h',showlegend:false,
+    marker:{color:seatRows.map(row=>colorForParty(row.party))},text:seatRows.map(row=>fmt(row.seats)),textposition:'outside',cliponaxis:false,
+    customdata:seatRows.map(row=>[row.rank,row.result_stage,row.classification_note]),
+    hovertemplate:`<b>%{y}</b><br>%{x} general seats<br>Rank %{customdata[0]}<br>%{customdata[1]}<br>%{customdata[2]}<extra></extra>`
+  }],{...baseLayout,margin:{t:18,r:42,b:54,l:145},xaxis:{...baseLayout.xaxis,type:'linear',rangemode:'tozero',title:'Declared general seats'},yaxis:{...baseLayout.yaxis,type:'category',autorange:'reversed'},showlegend:false},plotConfig);
 
   const margins = [...rows].filter(row=>row.margin_pct_points!==null).sort((a,b)=>b.margin_pct_points-a.margin_pct_points).slice(0,12).reverse();
   Plotly.react('topMargins', [{x:margins.map(row=>row.margin_pct_points),y:margins.map(row=>row.constituency_label),type:'bar',orientation:'h',marker:{color:margins.map(row=>colorForParty(row.winner_party_group))},customdata:margins.map(row=>[row.winner_candidate,row.winner_party_group]),hovertemplate:'%{y}<br>%{x:.2f} pp<br>%{customdata[0]} (%{customdata[1]})<extra></extra>'}], {...baseLayout,margin:{t:20,r:20,b:48,l:115},xaxis:{...baseLayout.xaxis,title:'Margin (percentage points)'},yaxis:{...baseLayout.yaxis}}, plotConfig);

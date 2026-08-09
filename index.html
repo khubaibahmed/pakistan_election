@@ -50,17 +50,16 @@
         <div class="control-row">
           <label>Election<select id="overviewYear"></select></label>
           <label>Metric<select id="overviewMetric">
-            <option value="turnout_pct">Turnout</option>
-            <option value="winner_vote_pct">Winner vote share</option>
-            <option value="margin_pct_points">Winning margin</option>
-            <option value="rejected_ballots_pct">Rejected ballots</option>
+            <option value="turnout">Votes polled</option>
+            <option value="registered_electors">Registered electors</option>
+            <option value="rejected_ballots">Rejected ballots</option>
           </select></label>
         </div>
       </div>
       <div class="kpi-grid" id="overviewKpis"></div>
       <div class="dashboard-grid">
-        <article class="card span-2"><div class="card-head"><div><h3>Constituency distribution</h3><p>Each dot is one National Assembly constituency.</p></div><span class="chart-tag" id="scatterTag"></span></div><div id="overviewScatter" class="chart tall"></div></article>
-        <article class="card"><div class="card-head"><div><h3>Top seven by declared general seats</h3><p>Election-result position before independents joined parties; reserved seats, later defections and by-elections are excluded. Parties tied for seventh are retained.</p><p class="source-note">In 2024, PTI-backed winners are an analytical subgroup of legally independent candidates. Sources: <a href="https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly" target="_blank" rel="noopener">2002</a> · <a href="https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly" target="_blank" rel="noopener">2008</a> · <a href="https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly" target="_blank" rel="noopener">2013</a> · <a href="https://ecp.gov.pk/storage/files/1/2018g.pdf" target="_blank" rel="noopener">ECP 2018</a> · <a href="https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly" target="_blank" rel="noopener">2024</a></p></div></div><div id="seatCounts" class="chart"></div></article>
+        <article class="card span-2"><div class="card-head"><div><h3>Constituency distribution</h3><p>Absolute constituency totals for registered electors, votes polled and rejected ballots.</p></div><span class="chart-tag" id="scatterTag"></span></div><div id="overviewScatter" class="chart tall"></div></article>
+        <article class="card"><div class="card-head"><div><h3>Leading parties in <span id="seatChartYear"></span></h3><p>Declared general-seat result before independents joined parties; reserved seats, later defections and by-elections are excluded. Parties tied for seventh are retained.</p><p class="source-note">In 2024, PTI-backed winners are an analytical subgroup of legally independent candidates. Sources: <a href="https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly" target="_blank" rel="noopener">2002</a> · <a href="https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly" target="_blank" rel="noopener">2008</a> · <a href="https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly" target="_blank" rel="noopener">2013</a> · <a href="https://ecp.gov.pk/storage/files/1/2018g.pdf" target="_blank" rel="noopener">ECP 2018</a> · <a href="https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly" target="_blank" rel="noopener">2024</a></p></div></div><div id="seatCounts" class="chart"></div></article>
         <article class="card"><div class="card-head"><div><h3>Largest winning margins</h3><p>The most decisive results in the selected election.</p></div></div><div id="topMargins" class="chart"></div></article>
       </div>
     </section>

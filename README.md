@@ -15,6 +15,8 @@ Built with **Plotly.js**, Python, SQLite, and static GitHub Pages.
 
 The tracked `source_data/` directory contains the five election workbooks and `Members_of_Parliament_Cleaned.xlsx`. The latter maps current constituency identifiers such as `NA-1` to historical constituency names and numbers.
 
+National party seat totals are deliberately kept separate in `data/national_assembly_general_seats.csv`. The workbook sheets are aligned to 266 present-day constituency slots for longitudinal lookup, so counting those aligned sheets would not reproduce historical National Assembly totals. The chart uses the published National Assembly result tables linked in the CSV, counts general seats only, and displays each election's own top seven categories.
+
 Candidate identity is based on normalized exact-name matching. Common names can refer to different people, so identity-level conclusions should be checked against authoritative biographical sources.
 
 ## Update for a future election
@@ -22,9 +24,10 @@ Candidate identity is based on normalized exact-name matching. Common names can 
 1. Add the new `ElectionYYYY.xlsx` workbook to `source_data/`, following the existing one-sheet-per-constituency format.
 2. Add the year and file to `ELECTION_FILES` in `scripts/build_database.py`.
 3. Update the cleaned Members of Parliament mapping if constituency boundaries or numbering changed.
-4. Install dependencies with `python -m pip install -r requirements.txt`.
-5. Run `python scripts/build_database.py` and then `python scripts/export_dashboard_data.py`.
-6. Review the generated dashboard locally, then commit the source and generated JSON files.
+4. Add the audited top-seven general-seat result to `data/national_assembly_general_seats.csv`, including the source URL.
+5. Install dependencies with `python -m pip install -r requirements.txt`.
+6. Run `python scripts/build_database.py` and then `python scripts/export_dashboard_data.py`.
+7. Review the generated dashboard locally, then commit the source and generated JSON files.
 
 GitHub Actions publishes the static site to GitHub Pages on every push to `main`.
 

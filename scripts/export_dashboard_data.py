@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import json
 import math
 import re
@@ -11,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DB = ROOT / "data" / "pakistan_elections.sqlite"
 DATA_DIR = ROOT / "data"
+NATIONAL_SEATS = DATA_DIR / "national_assembly_general_seats.csv"
 
 
 def clean_value(value):
@@ -44,6 +46,32 @@ def dump(name: str, payload) -> None:
     path = DATA_DIR / name
     path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":"), allow_nan=False), encoding="utf-8")
     print(f"wrote {path.name}: {path.stat().st_size:,} bytes")
+
+
+def load_national_seat_rows(years: list[int]) -> list[dict]:
+    with NATIONAL_SEATS.open(encoding="utf-8-sig", newline="") as handle:
+        seat_rows = [
+            {
+                "year": int(row["year"]),
+                "rank": int(row["rank"]),
+                "party": row["party"].strip(),
+                "seats": int(row["seats"]),
+                "source_url": row["source_url"].strip(),
+            }
+            for row in csv.DictReader(handle)
+        ]
+
+    expected_years = set(years)
+    actual_years = {row["year"] for row in seat_rows}
+    if actual_years != expected_years:
+        raise ValueError(f"National seat years {sorted(actual_years)} do not match dashboard years {sorted(expected_years)}")
+    for year in years:
+        year_rows = [row for row in seat_rows if row["year"] == year]
+        if len(year_rows) != 7 or {row["rank"] for row in year_rows} != set(range(1, 8)):
+            raise ValueError(f"{year} must contain exactly ranks 1 through 7 in {NATIONAL_SEATS.name}")
+        if year_rows != sorted(year_rows, key=lambda row: row["rank"]):
+            raise ValueError(f"{year} rows must be ordered by rank in {NATIONAL_SEATS.name}")
+    return seat_rows
 
 
 def main() -> None:
@@ -105,11 +133,9 @@ def main() -> None:
             "party_history": party_history_by_const[key],
         }
 
-    seat_rows = rows(conn, """
-        SELECT year, winner_party_group AS party, COUNT(*) AS seats
-        FROM constituency_summary
-        GROUP BY year, winner_party_group ORDER BY year, seats DESC
-    """)
+    # The 266 current-constituency slots are for longitudinal lookup, not
+    # historical national seat totals. Keep the national result chart separate.
+    seat_rows = load_national_seat_rows(years)
     party_year = rows(conn, """
         SELECT cr.year, cr.party_group AS party,
                COUNT(*) AS contests,
@@ -242,7 +268,7 @@ def main() -> None:
         "candidate_records": len(candidate_results),
         "candidate_profiles": len(candidate_profiles),
         "historical_member_records": len(member_rows),
-        "generated_from": [f"Election{year}.xlsx" for year in years] + ["Members_of_Parliament_Cleaned.xlsx"],
+        "generated_from": [f"Election{year}.xlsx" for year in years] + ["Members_of_Parliament_Cleaned.xlsx", NATIONAL_SEATS.name],
     }
     dump("dashboard.json", {
         "meta": meta,

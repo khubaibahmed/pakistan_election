@@ -73,7 +73,14 @@ function initialise() {
   });
 
   constituencySelect.value = '1';
-  selectedCandidateKey = candidateData.index.find(item => item.name.toLowerCase().startsWith('imran khan · pti'))?.key || candidateData.index[0]?.key;
+  const defaultCandidate = Object.values(candidateData.profiles)
+    .filter(profile => profile.loyal && !profile.ambiguous_name && profile.contests > 0)
+    .sort((a, b) => {
+      const electionsA = new Set(a.timeline.filter(row => row.source_type === 'contest').map(row => row.year)).size;
+      const electionsB = new Set(b.timeline.filter(row => row.source_type === 'contest').map(row => row.year)).size;
+      return electionsB - electionsA || b.contests - a.contests || b.wins - a.wins || a.name.localeCompare(b.name);
+    })[0];
+  selectedCandidateKey = defaultCandidate?.key || candidateData.index[0]?.key;
   drawOverview(); drawConstituency(); drawParty(); fillSwitchLeaders();
   if (selectedCandidateKey) selectCandidate(selectedCandidateKey);
   document.getElementById('loading').remove();
@@ -176,10 +183,11 @@ function selectCandidateFromInput() {
 }
 function selectCandidate(key) {
   const profile=candidateData.profiles[key];if(!profile)return;selectedCandidateKey=key;
+  const electionYears=[...new Set(profile.timeline.filter(row=>row.source_type==='contest').map(row=>row.year))].sort();
   document.getElementById('candidateSearch').value=profile.name;document.getElementById('candidateName').textContent=profile.name;
   document.getElementById('candidateSummary').textContent=`${profile.parties.join(' → ')} · ${profile.constituencies.length} historical constituency label${profile.constituencies.length===1?'':'s'}${profile.ambiguous_name?' · common-name profile separated by concurrent affiliation':''}`;
   const badge=document.getElementById('loyaltyBadge');badge.className=`loyalty-badge ${profile.loyal?'loyal':'switcher'}`;badge.textContent=profile.loyal?'● Consistent affiliation':`● ${profile.switches} recorded change${profile.switches===1?'':'s'}`;
-  document.getElementById('candidateKpis').innerHTML=[kpi('Contests',fmt(profile.contests),'2002–2024 workbooks'),kpi('Wins',fmt(profile.wins),'Contest records'),kpi('Parties',fmt(profile.parties.length),profile.parties.join(', ')),kpi('Constituencies',fmt(profile.constituencies.length),'Historical labels')].join('');
+  document.getElementById('candidateKpis').innerHTML=[kpi('Election years',fmt(electionYears.length),electionYears.join(', ')),kpi('Total contests',fmt(profile.contests),'Including multiple seats'),kpi('Wins',fmt(profile.wins),'Contest records'),kpi('Parties',fmt(profile.parties.length),profile.parties.join(', '))].join('');
   const timeline=profile.timeline;
   Plotly.react('candidateTimeline',[{
     x:timeline.map(row=>row.year),y:timeline.map(row=>row.party_std||row.party_group),type:'scatter',mode:'lines+markers+text',

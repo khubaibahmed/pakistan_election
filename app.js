@@ -156,17 +156,21 @@ function drawConstituency() {
 
   const grouped = new Map();
   data.party_history.forEach(row=>{
-    const key=`${row.year}|${row.party_group}`;
-    if(!grouped.has(key)||row.candidate_rank<grouped.get(key).candidate_rank) grouped.set(key,row);
+    const rank=Number(row.candidate_rank);
+    if(!Number.isFinite(rank)||rank<1||rank>9)return;
+    const chartParty=row.party_group==='MMA'?'JUI(F)':row.party_group;
+    const key=`${row.year}|${chartParty}`;
+    const chartRow={...row,candidate_rank:rank,chart_party:chartParty};
+    if(!grouped.has(key)||rank<grouped.get(key).candidate_rank) grouped.set(key,chartRow);
   });
   const appearances = new Map();
-  grouped.forEach(row=>appearances.set(row.party_group,(appearances.get(row.party_group)||0)+1));
-  const selectedParties=[...appearances.entries()].sort((a,b)=>b[1]-a[1]).slice(0,10).map(([party])=>party);
+  grouped.forEach(row=>appearances.set(row.chart_party,(appearances.get(row.chart_party)||0)+1));
+  const selectedParties=[...appearances.entries()].sort((a,b)=>b[1]-a[1]).slice(0,9).map(([party])=>party);
   const traces=selectedParties.map(party=>{
-    const partyRows=[...grouped.values()].filter(row=>row.party_group===party).sort((a,b)=>a.year-b.year);
+    const partyRows=[...grouped.values()].filter(row=>row.chart_party===party).sort((a,b)=>a.year-b.year);
     return {x:partyRows.map(row=>row.year),y:partyRows.map(row=>row.candidate_rank),type:'scatter',mode:'lines+markers',name:party,line:{color:colorForParty(party),width:2},marker:{size:9},customdata:partyRows.map(row=>[row.candidate_name,row.vote_pct,row.constituency_label]),hovertemplate:'%{x} · %{customdata[2]}<br>%{customdata[0]}<br>Rank %{y} · %{customdata[1]:.2f}%<extra></extra>'};
   });
-  Plotly.react('constituencyPartyRanks',traces,{...baseLayout,xaxis:{...baseLayout.xaxis,tickmode:'array',tickvals:dashboard.meta.years},yaxis:{...baseLayout.yaxis,title:'Best party candidate rank',autorange:'reversed',dtick:1}},plotConfig);
+  Plotly.react('constituencyPartyRanks',traces,{...baseLayout,xaxis:{...baseLayout.xaxis,type:'linear',tickmode:'array',tickvals:dashboard.meta.years},yaxis:{...baseLayout.yaxis,type:'linear',title:'Best party candidate rank',autorange:false,range:[9.5,.5],tickmode:'array',tickvals:[1,2,3,4,5,6,7,8,9],ticktext:['1','2','3','4','5','6','7','8','9']}},plotConfig);
   document.querySelector('#constituencyTable tbody').innerHTML=data.elections.map(row=>`<tr><td>${row.year}</td><td>${esc(row.constituency_label)}</td><td><span class="status win">${esc(row.winner_candidate)}</span></td><td>${esc(row.winner_party_group)}</td><td>${esc(row.runner_up_candidate)}</td><td>${fmt(row.turnout_pct,1)}%</td><td>${fmt(row.margin_pct_points,1)} pp</td></tr>`).join('');
 }
 

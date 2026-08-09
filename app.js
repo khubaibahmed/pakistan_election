@@ -107,6 +107,7 @@ function drawOverview() {
   const metric = document.getElementById('overviewMetric').value;
   const [label, suffix] = metricInfo[metric];
   const rows = dashboard.overview.filter(row => row.year === year);
+  const plotRows = rows.filter(row => row[metric] !== null && row[metric] !== undefined && Number.isFinite(Number(row.constituency_no)) && Number.isFinite(Number(row[metric])));
   document.getElementById('scatterTag').textContent = `${year} · ${label}`;
   document.getElementById('overviewKpis').innerHTML = [
     kpi('Average turnout', `${fmt(mean(rows.map(row => row.turnout_pct)),1)}%`, `${rows.length} constituencies`),
@@ -115,11 +116,11 @@ function drawOverview() {
     kpi('Candidates recorded', fmt(dashboard.party_year.filter(row=>row.year===year).reduce((sum,row)=>sum+row.contests,0)), 'Individual candidacies')
   ].join('');
   Plotly.react('overviewScatter', [{
-    x: rows.map(row=>row.constituency_no), y: rows.map(row=>row[metric]), type:'scatter', mode:'markers',
-    marker:{size:10, color:rows.map(row=>colorForParty(row.winner_party_group)), opacity:.84, line:{color:'#fffdf6',width:1}},
-    customdata: rows.map(row=>[row.constituency_label,row.winner_candidate,row.winner_party_group,row.runner_up_candidate]),
+    x: plotRows.map(row=>Number(row.constituency_no)), y: plotRows.map(row=>Number(row[metric])), type:'scatter', mode:'markers',
+    marker:{size:10, color:plotRows.map(row=>colorForParty(row.winner_party_group)), opacity:.84, line:{color:'#fffdf6',width:1}},
+    customdata: plotRows.map(row=>[row.constituency_label,row.winner_candidate,row.winner_party_group,row.runner_up_candidate]),
     hovertemplate:`<b>%{customdata[0]}</b><br>${label}: %{y:.2f}${suffix}<br>Winner: %{customdata[1]} (%{customdata[2]})<br>Runner-up: %{customdata[3]}<extra></extra>`
-  }], {...baseLayout, xaxis:{...baseLayout.xaxis,title:'Current constituency number',dtick:10}, yaxis:{...baseLayout.yaxis,title:`${label}${suffix==='%'?' (%)':''}`}}, plotConfig);
+  }], {...baseLayout, datarevision:`overview-${year}-${metric}`, xaxis:{...baseLayout.xaxis,type:'linear',autorange:true,title:'Current constituency number',dtick:10}, yaxis:{...baseLayout.yaxis,type:'linear',autorange:true,title:`${label}${suffix==='%'?' (%)':''}`}}, plotConfig);
 
   const mainParties = dashboard.party_order.slice(0,9);
   Plotly.react('seatCounts', mainParties.map(party=>({

@@ -17,6 +17,9 @@ function colorForParty(party) {
   if (!partyColors.has(party)) partyColors.set(party, COLORS[partyColors.size % COLORS.length]);
   return partyColors.get(party);
 }
+function nationalPartyKey(party) {
+  return ({PPPP:'PPP','MQM-L':'MQM','MQM-P':'MQM','PTI-backed independents':'PTI'})[party] || party;
+}
 function fmt(value, digits=0) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) return '—';
   return Number(value).toLocaleString('en-GB', {minimumFractionDigits: digits, maximumFractionDigits: digits});
@@ -127,7 +130,7 @@ function drawOverview() {
     hovertemplate:`<b>%{customdata[0]}</b><br>${label}: %{y:${format}}${suffix}<br>Winner: %{customdata[1]} (%{customdata[2]})<br>Runner-up: %{customdata[3]}<extra></extra>`
   }], {...baseLayout, datarevision:`overview-${year}-${metric}`, xaxis:{...baseLayout.xaxis,type:'linear',autorange:true,title:'Current constituency number',dtick:10}, yaxis:{...baseLayout.yaxis,type:'linear',autorange:true,tickformat,title:axisTitle}}, plotConfig);
 
-  const seatRows = dashboard.seat_counts.filter(row=>row.year===year).sort((a,b)=>b.seats-a.seats || a.party.localeCompare(b.party));
+  const seatRows = dashboard.seat_counts.filter(row=>row.year===year && row.rank<=7).sort((a,b)=>b.seats-a.seats || a.party.localeCompare(b.party));
   document.getElementById('seatChartYear').textContent = year;
   Plotly.react('seatCounts',[{
     x:seatRows.map(row=>row.seats),y:seatRows.map(row=>row.party),type:'bar',orientation:'h',showlegend:false,
@@ -169,16 +172,30 @@ function drawConstituency() {
 
 function drawParty() {
   const party=document.getElementById('partySelect').value;
-  const records=dashboard.party_year.filter(row=>row.party===party).sort((a,b)=>a.year-b.year);
+  const workbookRecords=new Map(dashboard.party_year.filter(row=>row.party===party).map(row=>[row.year,row]));
+  const auditedSeats=new Map(dashboard.seat_counts.filter(row=>nationalPartyKey(row.party)===nationalPartyKey(party)).map(row=>[row.year,row]));
+  const records=dashboard.meta.years.map(year=>{
+    const base=workbookRecords.get(year);
+    const audited=auditedSeats.get(year);
+    if(!base&&!audited)return null;
+    const boycotted=Boolean(audited?.classification_note?.toLowerCase().includes('boycotted'));
+    return {
+      ...(base||{year,contests:0,candidates:0,constituencies:0,votes:0,mean_vote_pct:null,seats:0}),
+      seats:audited?.seats??base?.seats??0,
+      contests:boycotted?0:(base?.contests||0),candidates:boycotted?0:(base?.candidates||0),
+      constituencies:boycotted?0:(base?.constituencies||0),votes:boycotted?0:(base?.votes||0),
+      mean_vote_pct:boycotted?null:(base?.mean_vote_pct??null),audited,boycotted
+    };
+  }).filter(Boolean);
   const latest=records.at(-1);
   document.getElementById('partyKpis').innerHTML=[
     kpi('Latest seats',fmt(latest?.seats||0),String(latest?.year||'')),kpi('Latest candidates',fmt(latest?.candidates||0),'Exact normalized names'),
     kpi('Average vote share',`${fmt(latest?.mean_vote_pct,1)}%`,'Across party candidates'),kpi('Total recorded votes',fmt(records.reduce((sum,row)=>sum+(row.votes||0),0)),'Across all five elections')
   ].join('');
   Plotly.react('partyTrend',[
-    {x:records.map(row=>row.year),y:records.map(row=>row.seats),type:'bar',name:'Seats',marker:{color:colorForParty(party)},hovertemplate:'%{x}: %{y} seats<extra></extra>'},
-    {x:records.map(row=>row.year),y:records.map(row=>row.mean_vote_pct),type:'scatter',mode:'lines+markers+text',name:'Average vote %',yaxis:'y2',line:{color:'#d4473f',width:3},marker:{size:9},text:records.map(row=>`${fmt(row.mean_vote_pct,1)}%`),textposition:'top center',hovertemplate:'%{x}: %{y:.2f}% average vote<extra></extra>'}
-  ],{...baseLayout,xaxis:{...baseLayout.xaxis,tickmode:'array',tickvals:dashboard.meta.years},yaxis:{...baseLayout.yaxis,title:'Seats'},yaxis2:{title:'Average vote share (%)',overlaying:'y',side:'right',gridcolor:'rgba(0,0,0,0)'},legend:{orientation:'h',y:1.12,x:0}},plotConfig);
+    {x:records.map(row=>row.year),y:records.map(row=>row.seats),type:'bar',name:'General seats',marker:{color:colorForParty(party)},text:records.map(row=>row.seats),textposition:'outside',cliponaxis:false,customdata:records.map(row=>[row.audited?.classification_note||'Constituency records']),hovertemplate:'%{x}: %{y} general seats<br>%{customdata[0]}<extra></extra>'},
+    {x:records.map(row=>row.year),y:records.map(row=>row.mean_vote_pct),type:'scatter',mode:'lines+markers+text',connectgaps:false,name:'Average vote %',yaxis:'y2',line:{color:'#d4473f',width:3},marker:{size:9},text:records.map(row=>row.mean_vote_pct===null?'':`${fmt(row.mean_vote_pct,1)}%`),textposition:'top center',hovertemplate:'%{x}: %{y:.2f}% average vote<extra></extra>'}
+  ],{...baseLayout,xaxis:{...baseLayout.xaxis,tickmode:'array',tickvals:dashboard.meta.years},yaxis:{...baseLayout.yaxis,title:'Declared general seats'},yaxis2:{title:'Average vote share (%)',overlaying:'y',side:'right',gridcolor:'rgba(0,0,0,0)'},legend:{orientation:'h',y:1.12,x:0},annotations:records.filter(row=>row.boycotted).map(row=>({x:row.year,y:0,yref:'y',text:'Boycotted',showarrow:true,arrowhead:0,ay:-32,font:{color:'#a52e28',size:11}}))},plotConfig);
   const latestYear=dashboard.meta.years.at(-1);const candidates=[];
   Object.values(dashboard.constituencies).forEach(item=>item.party_history.filter(row=>row.year===latestYear&&row.party_group===party).forEach(row=>candidates.push(row)));
   const strongest=candidates.filter(row=>row.vote_pct!==null).sort((a,b)=>b.vote_pct-a.vote_pct).slice(0,18).reverse();

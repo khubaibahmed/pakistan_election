@@ -69,8 +69,9 @@ def load_national_seat_rows(years: list[int]) -> list[dict]:
         raise ValueError(f"National seat years {sorted(actual_years)} do not match dashboard years {sorted(expected_years)}")
     for year in years:
         year_rows = [row for row in seat_rows if row["year"] == year]
-        if len(year_rows) < 7 or min(row["rank"] for row in year_rows) != 1 or max(row["rank"] for row in year_rows) > 7:
-            raise ValueError(f"{year} must contain at least seven rows ranked within the top seven in {NATIONAL_SEATS.name}")
+        top_rows = [row for row in year_rows if row["rank"] <= 7]
+        if len(top_rows) < 7 or min(row["rank"] for row in top_rows) != 1:
+            raise ValueError(f"{year} must contain at least seven top-seven rows in {NATIONAL_SEATS.name}")
         if year_rows != sorted(year_rows, key=lambda row: row["rank"]):
             raise ValueError(f"{year} rows must be ordered by rank in {NATIONAL_SEATS.name}")
     return seat_rows

@@ -122,11 +122,43 @@ function drawOverview() {
     hovertemplate:`<b>%{customdata[0]}</b><br>${label}: %{y:.2f}${suffix}<br>Winner: %{customdata[1]} (%{customdata[2]})<br>Runner-up: %{customdata[3]}<extra></extra>`
   }], {...baseLayout, datarevision:`overview-${year}-${metric}`, xaxis:{...baseLayout.xaxis,type:'linear',autorange:true,title:'Current constituency number',dtick:10}, yaxis:{...baseLayout.yaxis,type:'linear',autorange:true,title:`${label}${suffix==='%'?' (%)':''}`}}, plotConfig);
 
-  const mainParties = dashboard.party_order.slice(0,9);
-  Plotly.react('seatCounts', mainParties.map(party=>({
-    x: dashboard.meta.years, y: dashboard.meta.years.map(y=>dashboard.seat_counts.find(row=>row.year===y&&row.party===party)?.seats||0),
-    type:'bar',name:party,marker:{color:colorForParty(party)},hovertemplate:`${party}<br>%{x}: %{y} seats<extra></extra>`
-  })), {...baseLayout,barmode:'stack',xaxis:{...baseLayout.xaxis,tickmode:'array',tickvals:dashboard.meta.years},yaxis:{...baseLayout.yaxis,title:'Seats'}}, plotConfig);
+  const topPartyLimit = 7;
+  const seatRowsByYear = new Map(dashboard.meta.years.map(electionYear => [
+    electionYear,
+    dashboard.seat_counts.filter(row=>row.year===electionYear&&row.seats>0).sort((a,b)=>b.seats-a.seats)
+  ]));
+  const topRowsByYear = new Map(dashboard.meta.years.map(electionYear=>[
+    electionYear,
+    seatRowsByYear.get(electionYear).filter(row=>row.party!=='Other').slice(0,topPartyLimit)
+  ]));
+  const legendParties = new Set();
+  const seatTraces = [];
+  dashboard.meta.years.forEach(electionYear=>topRowsByYear.get(electionYear).forEach(row=>{
+    const showLegend=!legendParties.has(row.party);
+    legendParties.add(row.party);
+    seatTraces.push({
+      x:[electionYear],y:[row.seats],type:'bar',name:row.party,legendgroup:row.party,showlegend:showLegend,
+      marker:{color:colorForParty(row.party)},text:[`${row.party}<br>${row.seats}`],
+      textposition:'inside',insidetextanchor:'middle',
+      hovertemplate:`${row.party}<br>%{x}: %{y} seats<extra></extra>`
+    });
+  }));
+  seatTraces.push({
+    x:dashboard.meta.years,
+    y:dashboard.meta.years.map(electionYear=>{
+      const topParties=new Set(topRowsByYear.get(electionYear).map(row=>row.party));
+      return seatRowsByYear.get(electionYear).filter(row=>!topParties.has(row.party)).reduce((sum,row)=>sum+row.seats,0);
+    }),
+    type:'bar',name:'Other parties',marker:{color:'#aeb4ad'},
+    text:dashboard.meta.years.map(electionYear=>{
+      const topParties=new Set(topRowsByYear.get(electionYear).map(row=>row.party));
+      const seats=seatRowsByYear.get(electionYear).filter(row=>!topParties.has(row.party)).reduce((sum,row)=>sum+row.seats,0);
+      return seats?`Other<br>${seats}`:'';
+    }),
+    textposition:'inside',insidetextanchor:'middle',
+    hovertemplate:'All parties outside this election’s top 7<br>%{x}: %{y} seats<extra></extra>'
+  });
+  Plotly.react('seatCounts',seatTraces,{...baseLayout,barmode:'stack',bargap:.3,uniformtext:{minsize:9,mode:'hide'},xaxis:{...baseLayout.xaxis,type:'linear',tickmode:'array',tickvals:dashboard.meta.years},yaxis:{...baseLayout.yaxis,type:'linear',title:'Seats'},legend:{orientation:'h',y:1.18,x:0,traceorder:'normal'}},plotConfig);
 
   const margins = [...rows].filter(row=>row.margin_pct_points!==null).sort((a,b)=>b.margin_pct_points-a.margin_pct_points).slice(0,12).reverse();
   Plotly.react('topMargins', [{x:margins.map(row=>row.margin_pct_points),y:margins.map(row=>row.constituency_label),type:'bar',orientation:'h',marker:{color:margins.map(row=>colorForParty(row.winner_party_group))},customdata:margins.map(row=>[row.winner_candidate,row.winner_party_group]),hovertemplate:'%{y}<br>%{x:.2f} pp<br>%{customdata[0]} (%{customdata[1]})<extra></extra>'}], {...baseLayout,margin:{t:20,r:20,b:48,l:115},xaxis:{...baseLayout.xaxis,title:'Margin (percentage points)'},yaxis:{...baseLayout.yaxis}}, plotConfig);

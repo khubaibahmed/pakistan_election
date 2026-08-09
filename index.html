@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interactive constituency, election, party and candidate analytics for Pakistan's National Assembly elections.">
+  <meta name="theme-color" content="#08140f">
+  <title>Pakistan Election Atlas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+</head>
+<body>
+  <header class="hero">
+    <nav class="topbar" aria-label="Project information">
+      <a class="brand" href="#top" aria-label="Pakistan Election Atlas home">
+        <span class="brand-mark">PK</span><span>Election Atlas</span>
+      </a>
+      <div class="project-note"><span class="pulse"></span> Open election data · Interactive Plotly analytics</div>
+    </nav>
+    <div class="hero-grid" id="top">
+      <div>
+        <p class="eyebrow">National Assembly · historical analytics</p>
+        <h1>Every election tells a story.<br><span>Follow it constituency by constituency.</span></h1>
+        <p class="hero-copy">Explore five general elections, trace party strength, compare candidates, and follow constituency renumbering through the historical Members of Parliament record.</p>
+      </div>
+      <div class="hero-summary" aria-label="Dataset summary">
+        <div><strong id="statElections">—</strong><span>Elections</span></div>
+        <div><strong id="statCandidates">—</strong><span>Candidate profiles</span></div>
+        <div><strong id="statRecords">—</strong><span>Candidacy records</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="tab-shell">
+      <div class="tabs" role="tablist" aria-label="Analytics views">
+        <button class="tab active" role="tab" aria-selected="true" data-view="overview">Election overview</button>
+        <button class="tab" role="tab" aria-selected="false" data-view="constituency">Constituency</button>
+        <button class="tab" role="tab" aria-selected="false" data-view="party">Party</button>
+        <button class="tab" role="tab" aria-selected="false" data-view="candidate">Candidate</button>
+      </div>
+    </div>
+
+    <section class="view active" id="view-overview" aria-labelledby="overview-title">
+      <div class="section-heading">
+        <div><p class="kicker">Election-wise analytics</p><h2 id="overview-title">The national picture</h2></div>
+        <div class="control-row">
+          <label>Election<select id="overviewYear"></select></label>
+          <label>Metric<select id="overviewMetric">
+            <option value="turnout_pct">Turnout</option>
+            <option value="winner_vote_pct">Winner vote share</option>
+            <option value="margin_pct_points">Winning margin</option>
+            <option value="rejected_ballots_pct">Rejected ballots</option>
+          </select></label>
+        </div>
+      </div>
+      <div class="kpi-grid" id="overviewKpis"></div>
+      <div class="dashboard-grid">
+        <article class="card span-2"><div class="card-head"><div><h3>Constituency distribution</h3><p>Each dot is one National Assembly constituency.</p></div><span class="chart-tag" id="scatterTag"></span></div><div id="overviewScatter" class="chart tall"></div></article>
+        <article class="card"><div class="card-head"><div><h3>Seats by party</h3><p>Winning party comparison across elections.</p></div></div><div id="seatCounts" class="chart"></div></article>
+        <article class="card"><div class="card-head"><div><h3>Largest winning margins</h3><p>The most decisive results in the selected election.</p></div></div><div id="topMargins" class="chart"></div></article>
+      </div>
+    </section>
+
+    <section class="view" id="view-constituency" aria-labelledby="constituency-title" hidden>
+      <div class="section-heading">
+        <div><p class="kicker">Constituency-wise analytics</p><h2 id="constituency-title">A seat through changing boundaries</h2></div>
+        <label class="wide-control">Current constituency<select id="constituencySelect"></select></label>
+      </div>
+      <div class="mapping-strip"><span>Historical mapping</span><div id="constituencyPeriods"></div></div>
+      <div class="dashboard-grid">
+        <article class="card span-2"><div class="card-head"><div><h3>Winner history</h3><p>Winning candidate, party and vote share at each election.</p></div></div><div id="constituencyWinners" class="chart"></div></article>
+        <article class="card span-2"><div class="card-head"><div><h3>Party position in this constituency</h3><p>Rank 1 is the winner; lines follow each party through time.</p></div></div><div id="constituencyPartyRanks" class="chart tall"></div></article>
+        <article class="card span-2 table-card"><div class="card-head"><div><h3>Election record</h3><p>Winner, runner-up, turnout and margin.</p></div></div><div class="table-wrap"><table id="constituencyTable"><thead><tr><th>Election</th><th>Historic seat</th><th>Winner</th><th>Party</th><th>Runner-up</th><th>Turnout</th><th>Margin</th></tr></thead><tbody></tbody></table></div></article>
+      </div>
+    </section>
+
+    <section class="view" id="view-party" aria-labelledby="party-title" hidden>
+      <div class="section-heading">
+        <div><p class="kicker">Party-wise analytics</p><h2 id="party-title">Track a party across elections</h2></div>
+        <label class="wide-control">Party<select id="partySelect"></select></label>
+      </div>
+      <div class="kpi-grid" id="partyKpis"></div>
+      <div class="dashboard-grid">
+        <article class="card span-2"><div class="card-head"><div><h3>Seats and average vote share</h3><p>National performance in every available election.</p></div></div><div id="partyTrend" class="chart tall"></div></article>
+        <article class="card span-2"><div class="card-head"><div><h3>Strongest constituencies</h3><p>Latest-election candidate vote share by constituency.</p></div></div><div id="partyStrongholds" class="chart"></div></article>
+      </div>
+    </section>
+
+    <section class="view" id="view-candidate" aria-labelledby="candidate-title" hidden>
+      <div class="section-heading candidate-heading">
+        <div><p class="kicker">Candidate-wise analytics</p><h2 id="candidate-title">Follow a political journey</h2></div>
+        <label class="search-control">Search candidate<input id="candidateSearch" list="candidateList" autocomplete="off" placeholder="Type a candidate name…"><datalist id="candidateList"></datalist></label>
+      </div>
+      <div class="candidate-banner">
+        <div><p class="candidate-label">Selected candidate</p><h3 id="candidateName">—</h3><p id="candidateSummary">Search for a candidate to see their record.</p></div>
+        <span class="loyalty-badge" id="loyaltyBadge">—</span>
+      </div>
+      <div class="kpi-grid" id="candidateKpis"></div>
+      <div class="legend-note"><span class="dot stable"></span> Same affiliation <span class="dot switched"></span> Party changed since previous appearance</div>
+      <div class="dashboard-grid">
+        <article class="card span-2"><div class="card-head"><div><h3>Party and constituency timeline</h3><p>Red markers identify a change from the candidate’s previous recorded affiliation.</p></div></div><div id="candidateTimeline" class="chart tall"></div></article>
+        <article class="card span-2 table-card"><div class="card-head"><div><h3>Complete recorded history</h3><p>Contest results from 2002–2024, supplemented by earlier elected-member records.</p></div></div><div class="table-wrap"><table id="candidateTable"><thead><tr><th>Year</th><th>Historic seat</th><th>Party</th><th>Votes</th><th>Share</th><th>Result</th><th>Affiliation</th></tr></thead><tbody></tbody></table></div></article>
+        <article class="card span-2 table-card"><div class="card-head"><div><h3>Most frequent party changes</h3><p>Exact-name matches with at least two recorded contests.</p></div></div><div class="table-wrap"><table id="switchLeaders"><thead><tr><th>Candidate</th><th>Contests</th><th>Parties</th><th>Changes</th><th>Constituencies</th></tr></thead><tbody></tbody></table></div></article>
+      </div>
+    </section>
+
+    <section class="methodology">
+      <div><p class="kicker">Built to grow</p><h2>Add the next election without redesigning the site.</h2></div>
+      <p>The repository includes source workbooks and repeatable data-build scripts. Candidate matching uses normalized exact names; common names may represent more than one person and should be reviewed before identity-level conclusions.</p>
+    </section>
+  </main>
+
+  <footer><span>Pakistan Election Atlas</span><span>Plotly.js · static GitHub Pages dashboard</span></footer>
+  <div id="loading" role="status">Loading election history…</div>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 # Pakistan Election Atlas
+Dashboard : https://khubaibahmed.github.io/pakistan_election/
 
 An interactive, constituency-level history of Pakistan National Assembly elections. The dashboard covers the 2002, 2008, 2013, 2018 and 2024 general elections and supplements them with the historical Members of Parliament constituency mapping.
 

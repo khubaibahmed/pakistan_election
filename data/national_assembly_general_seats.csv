@@ -1,36 +1,38 @@
-year,rank,party,seats,source_url
-2002,1,PML(Q),78,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
-2002,2,PPPP,63,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
-2002,3,MMA,45,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
-2002,4,Independents,28,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
-2002,5,PML(N),15,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
-2002,6,National Alliance,13,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
-2002,7,MQM,13,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
-2008,1,PPP,89,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
-2008,2,PML(N),68,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
-2008,3,PML(Q),42,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
-2008,4,Independents,30,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
-2008,5,MQM,19,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
-2008,6,ANP,10,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
-2008,7,MMA,6,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
-2013,1,PML(N),126,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
-2013,2,PPP,33,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
-2013,3,PTI,28,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
-2013,4,Independents,27,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
-2013,5,MQM-L,19,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
-2013,6,JUI(F),11,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
-2013,7,PML(F),5,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
-2018,1,PTI,118,https://en.wikipedia.org/wiki/2018_Pakistani_general_election#National_Assembly
-2018,2,PML(N),65,https://en.wikipedia.org/wiki/2018_Pakistani_general_election#National_Assembly
-2018,3,PPP,44,https://en.wikipedia.org/wiki/2018_Pakistani_general_election#National_Assembly
-2018,4,MMA,12,https://en.wikipedia.org/wiki/2018_Pakistani_general_election#National_Assembly
-2018,5,Independents,11,https://en.wikipedia.org/wiki/2018_Pakistani_general_election#National_Assembly
-2018,6,MQM-P,6,https://en.wikipedia.org/wiki/2018_Pakistani_general_election#National_Assembly
-2018,7,PML(Q),4,https://en.wikipedia.org/wiki/2018_Pakistani_general_election#National_Assembly
-2024,1,PTI-backed independents,93,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
-2024,2,PML(N),75,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
-2024,3,PPP,54,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
-2024,4,MQM-P,18,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
-2024,5,Independents,7,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
-2024,6,JUI(F),5,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
-2024,7,IPP,3,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
+year,rank,party,seats,result_stage,classification_note,source_url
+2002,1,PML(Q),78,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
+2002,2,PPPP,63,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
+2002,3,MMA,45,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
+2002,4,Independents,28,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
+2002,5,PML(N),15,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
+2002,6,National Alliance,13,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
+2002,6,MQM,13,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2002_Pakistani_general_election#National_Assembly
+2008,1,PPP,89,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
+2008,2,PML(N),68,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
+2008,3,PML(Q),42,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
+2008,4,Independents,30,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
+2008,5,MQM,19,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
+2008,6,ANP,10,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
+2008,7,MMA,6,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2008_Pakistani_general_election#National_Assembly
+2013,1,PML(N),126,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
+2013,2,PPP,33,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
+2013,3,PTI,28,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
+2013,4,Independents,27,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
+2013,5,MQM-L,19,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
+2013,6,JUI(F),11,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
+2013,7,PML(F),5,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2013_Pakistani_general_election#National_Assembly
+2018,1,PTI,116,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://ecp.gov.pk/storage/files/1/2018g.pdf
+2018,2,PML(N),64,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://ecp.gov.pk/storage/files/1/2018g.pdf
+2018,3,PPP,43,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://ecp.gov.pk/storage/files/1/2018g.pdf
+2018,4,Independents,13,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://ecp.gov.pk/storage/files/1/2018g.pdf
+2018,5,MMA,12,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://ecp.gov.pk/storage/files/1/2018g.pdf
+2018,6,MQM-P,6,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://ecp.gov.pk/storage/files/1/2018g.pdf
+2018,7,PML(Q),4,Declared general-seat result,Joint seventh; before independents joined parties; reserved seats excluded,https://ecp.gov.pk/storage/files/1/2018g.pdf
+2018,7,BAP,4,Declared general-seat result,Joint seventh; before independents joined parties; reserved seats excluded,https://ecp.gov.pk/storage/files/1/2018g.pdf
+2024,1,PTI-backed independents,93,Declared general-seat result,Analytical subgroup of candidates legally returned as independents,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
+2024,2,PML(N),75,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
+2024,3,PPP,54,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
+2024,4,MQM-P,17,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
+2024,5,Other independents,10,Declared general-seat result,Excludes the 93 PTI-backed independents shown separately,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
+2024,6,JUI(F),4,Declared general-seat result,Before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
+2024,7,PML(Q),3,Declared general-seat result,Joint seventh; before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly
+2024,7,IPP,3,Declared general-seat result,Joint seventh; before independents joined parties; reserved seats excluded,https://en.wikipedia.org/wiki/2024_Pakistani_general_election#National_Assembly

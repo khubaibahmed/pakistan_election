@@ -56,6 +56,8 @@ def load_national_seat_rows(years: list[int]) -> list[dict]:
                 "rank": int(row["rank"]),
                 "party": row["party"].strip(),
                 "seats": int(row["seats"]),
+                "result_stage": row["result_stage"].strip(),
+                "classification_note": row["classification_note"].strip(),
                 "source_url": row["source_url"].strip(),
             }
             for row in csv.DictReader(handle)
@@ -67,8 +69,8 @@ def load_national_seat_rows(years: list[int]) -> list[dict]:
         raise ValueError(f"National seat years {sorted(actual_years)} do not match dashboard years {sorted(expected_years)}")
     for year in years:
         year_rows = [row for row in seat_rows if row["year"] == year]
-        if len(year_rows) != 7 or {row["rank"] for row in year_rows} != set(range(1, 8)):
-            raise ValueError(f"{year} must contain exactly ranks 1 through 7 in {NATIONAL_SEATS.name}")
+        if len(year_rows) < 7 or min(row["rank"] for row in year_rows) != 1 or max(row["rank"] for row in year_rows) > 7:
+            raise ValueError(f"{year} must contain at least seven rows ranked within the top seven in {NATIONAL_SEATS.name}")
         if year_rows != sorted(year_rows, key=lambda row: row["rank"]):
             raise ValueError(f"{year} rows must be ordered by rank in {NATIONAL_SEATS.name}")
     return seat_rows

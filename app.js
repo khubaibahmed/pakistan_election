@@ -133,12 +133,12 @@ function drawOverview() {
     legendParties.add(row.party);
     seatTraces.push({
       x:[electionYear],y:[row.seats],type:'bar',name:row.party,legendgroup:row.party,showlegend:showLegend,
-      marker:{color:colorForParty(row.party)},text:[`${row.party}<br>${row.seats}`],
+      marker:{color:colorForParty(row.party)},text:[`${row.party}<br>${row.seats}`],customdata:[[row.result_stage,row.classification_note]],
       textposition:'inside',insidetextanchor:'middle',
-      hovertemplate:`${row.party}<br>%{x}: %{y} general seats<br>Rank ${row.rank}<extra></extra>`
+      hovertemplate:`<b>${row.party}</b><br>%{x}: %{y} general seats<br>Rank ${row.rank}<br>%{customdata[0]}<br>%{customdata[1]}<extra></extra>`
     });
   }));
-  Plotly.react('seatCounts',seatTraces,{...baseLayout,barmode:'stack',bargap:.3,uniformtext:{minsize:9,mode:'hide'},xaxis:{...baseLayout.xaxis,type:'linear',tickmode:'array',tickvals:dashboard.meta.years},yaxis:{...baseLayout.yaxis,type:'linear',title:'General seats held by top seven'},legend:{orientation:'h',y:1.18,x:0,traceorder:'normal'}},plotConfig);
+  Plotly.react('seatCounts',seatTraces,{...baseLayout,barmode:'stack',bargap:.3,uniformtext:{minsize:9,mode:'hide'},xaxis:{...baseLayout.xaxis,type:'linear',tickmode:'array',tickvals:dashboard.meta.years},yaxis:{...baseLayout.yaxis,type:'linear',title:'Declared general seats (top seven + ties)'},legend:{orientation:'h',y:1.18,x:0,traceorder:'normal'}},plotConfig);
 
   const margins = [...rows].filter(row=>row.margin_pct_points!==null).sort((a,b)=>b.margin_pct_points-a.margin_pct_points).slice(0,12).reverse();
   Plotly.react('topMargins', [{x:margins.map(row=>row.margin_pct_points),y:margins.map(row=>row.constituency_label),type:'bar',orientation:'h',marker:{color:margins.map(row=>colorForParty(row.winner_party_group))},customdata:margins.map(row=>[row.winner_candidate,row.winner_party_group]),hovertemplate:'%{y}<br>%{x:.2f} pp<br>%{customdata[0]} (%{customdata[1]})<extra></extra>'}], {...baseLayout,margin:{t:20,r:20,b:48,l:115},xaxis:{...baseLayout.xaxis,title:'Margin (percentage points)'},yaxis:{...baseLayout.yaxis}}, plotConfig);

@@ -50,9 +50,10 @@
         <div class="control-row">
           <label>Election<select id="overviewYear"></select></label>
           <label>Metric<select id="overviewMetric">
-            <option value="turnout">Votes polled</option>
-            <option value="registered_electors">Registered electors</option>
-            <option value="rejected_ballots">Rejected ballots</option>
+            <option value="turnout_pct">Turnout (%)</option>
+            <option value="turnout">Votes polled (count)</option>
+            <option value="registered_electors">Registered electors (count)</option>
+            <option value="rejected_ballots">Rejected ballots (count)</option>
           </select></label>
         </div>
       </div>
@@ -115,6 +116,6 @@
 
   <footer><span>Pakistan Election Atlas</span><span>Plotly.js · static GitHub Pages dashboard</span></footer>
   <div id="loading" role="status">Loading election history…</div>
-  <script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

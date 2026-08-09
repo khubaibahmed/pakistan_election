@@ -31,7 +31,10 @@ function mean(values) {
 function kpi(label, value, note='') { return `<div class="kpi"><span>${esc(label)}</span><strong>${esc(value)}</strong>${note ? `<small>${esc(note)}</small>` : ''}</div>`; }
 
 async function loadData() {
-  const [dashboardResponse, candidateResponse] = await Promise.all([fetch('data/dashboard.json'), fetch('data/candidates.json')]);
+  const [dashboardResponse, candidateResponse] = await Promise.all([
+    fetch('data/dashboard.json', {cache:'no-store'}),
+    fetch('data/candidates.json', {cache:'no-store'})
+  ]);
   if (!dashboardResponse.ok || !candidateResponse.ok) throw new Error('Data files could not be loaded.');
   dashboard = await dashboardResponse.json();
   candidateData = await candidateResponse.json();
@@ -99,14 +102,15 @@ function openView(name) {
 }
 
 const metricInfo = {
-  turnout: 'Votes polled',
-  registered_electors: 'Registered electors',
-  rejected_ballots: 'Rejected ballots'
+  turnout_pct: {label:'Turnout', axisTitle:'Turnout (%)', format:'.2f', tickformat:'.1f', suffix:'%'},
+  turnout: {label:'Votes polled', axisTitle:'Votes polled (count)', format:',.0f', tickformat:',.0f', suffix:''},
+  registered_electors: {label:'Registered electors', axisTitle:'Registered electors (count)', format:',.0f', tickformat:',.0f', suffix:''},
+  rejected_ballots: {label:'Rejected ballots', axisTitle:'Rejected ballots (count)', format:',.0f', tickformat:',.0f', suffix:''}
 };
 function drawOverview() {
   const year = Number(document.getElementById('overviewYear').value);
   const metric = document.getElementById('overviewMetric').value;
-  const label = metricInfo[metric];
+  const {label,axisTitle,format,tickformat,suffix} = metricInfo[metric];
   const rows = dashboard.overview.filter(row => row.year === year);
   const plotRows = rows.filter(row => row[metric] !== null && row[metric] !== undefined && Number.isFinite(Number(row.constituency_no)) && Number.isFinite(Number(row[metric])));
   document.getElementById('scatterTag').textContent = `${year} · ${label}`;
@@ -120,8 +124,8 @@ function drawOverview() {
     x: plotRows.map(row=>Number(row.constituency_no)), y: plotRows.map(row=>Number(row[metric])), type:'scatter', mode:'markers',
     marker:{size:10, color:plotRows.map(row=>colorForParty(row.winner_party_group)), opacity:.84, line:{color:'#fffdf6',width:1}},
     customdata: plotRows.map(row=>[row.constituency_label,row.winner_candidate,row.winner_party_group,row.runner_up_candidate]),
-    hovertemplate:`<b>%{customdata[0]}</b><br>${label}: %{y:,.0f}<br>Winner: %{customdata[1]} (%{customdata[2]})<br>Runner-up: %{customdata[3]}<extra></extra>`
-  }], {...baseLayout, datarevision:`overview-${year}-${metric}`, xaxis:{...baseLayout.xaxis,type:'linear',autorange:true,title:'Current constituency number',dtick:10}, yaxis:{...baseLayout.yaxis,type:'linear',autorange:true,tickformat:',.0f',title:`${label} (count)`}}, plotConfig);
+    hovertemplate:`<b>%{customdata[0]}</b><br>${label}: %{y:${format}}${suffix}<br>Winner: %{customdata[1]} (%{customdata[2]})<br>Runner-up: %{customdata[3]}<extra></extra>`
+  }], {...baseLayout, datarevision:`overview-${year}-${metric}`, xaxis:{...baseLayout.xaxis,type:'linear',autorange:true,title:'Current constituency number',dtick:10}, yaxis:{...baseLayout.yaxis,type:'linear',autorange:true,tickformat,title:axisTitle}}, plotConfig);
 
   const seatRows = dashboard.seat_counts.filter(row=>row.year===year).sort((a,b)=>b.seats-a.seats || a.party.localeCompare(b.party));
   document.getElementById('seatChartYear').textContent = year;

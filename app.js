@@ -17,8 +17,11 @@ function colorForParty(party) {
   if (!partyColors.has(party)) partyColors.set(party, COLORS[partyColors.size % COLORS.length]);
   return partyColors.get(party);
 }
+function partyPageKey(party) {
+  return party==='MMA'?'JUI(F)':party;
+}
 function nationalPartyKey(party) {
-  return ({PPPP:'PPP','MQM-L':'MQM','MQM-P':'MQM','PTI-backed independents':'PTI'})[party] || party;
+  return partyPageKey((({PPPP:'PPP','MQM-L':'MQM','MQM-P':'MQM','PTI-backed independents':'PTI'})[party] || party));
 }
 function fmt(value, digits=0) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) return '—';
@@ -58,7 +61,7 @@ function initialise() {
   const constituencySelect = document.getElementById('constituencySelect');
   constituencySelect.innerHTML = Object.keys(dashboard.constituencies).map(Number).sort((a,b)=>a-b).map(number => `<option value="${number}">NA-${number}</option>`).join('');
 
-  const parties = dashboard.party_order.filter(Boolean);
+  const parties = [...new Set(dashboard.party_order.filter(Boolean).map(partyPageKey))];
   const partySelect = document.getElementById('partySelect');
   partySelect.innerHTML = parties.map(party => `<option>${esc(party)}</option>`).join('');
   partySelect.value = parties.includes('PTI') ? 'PTI' : parties[0];
@@ -176,8 +179,22 @@ function drawConstituency() {
 
 function drawParty() {
   const party=document.getElementById('partySelect').value;
-  const workbookRecords=new Map(dashboard.party_year.filter(row=>row.party===party).map(row=>[row.year,row]));
-  const auditedSeats=new Map(dashboard.seat_counts.filter(row=>nationalPartyKey(row.party)===nationalPartyKey(party)).map(row=>[row.year,row]));
+  const workbookRecords=new Map();
+  dashboard.party_year.filter(row=>partyPageKey(row.party)===party).forEach(row=>{
+    const current=workbookRecords.get(row.year)||{year:row.year,party,contests:0,candidates:0,constituencies:0,votes:0,mean_vote_pct:null,seats:0,_weightedShare:0,_shareWeight:0};
+    current.contests+=row.contests||0;current.candidates+=row.candidates||0;current.constituencies+=row.constituencies||0;
+    current.votes+=row.votes||0;current.seats+=row.seats||0;
+    if(row.mean_vote_pct!==null&&row.mean_vote_pct!==undefined){current._weightedShare+=row.mean_vote_pct*(row.contests||0);current._shareWeight+=row.contests||0;}
+    current.mean_vote_pct=current._shareWeight?current._weightedShare/current._shareWeight:null;
+    workbookRecords.set(row.year,current);
+  });
+  const auditedSeats=new Map();
+  dashboard.seat_counts.filter(row=>nationalPartyKey(row.party)===nationalPartyKey(party)).forEach(row=>{
+    const current=auditedSeats.get(row.year)||{year:row.year,seats:0,classification_note:'',source_url:row.source_url};
+    current.seats+=row.seats;
+    current.classification_note=[current.classification_note,row.classification_note].filter(Boolean).join(' / ');
+    auditedSeats.set(row.year,current);
+  });
   const records=dashboard.meta.years.map(year=>{
     const base=workbookRecords.get(year);
     const audited=auditedSeats.get(year);
@@ -201,7 +218,7 @@ function drawParty() {
     {x:records.map(row=>row.year),y:records.map(row=>row.mean_vote_pct),type:'scatter',mode:'lines+markers+text',connectgaps:false,name:'Average vote %',yaxis:'y2',line:{color:'#d4473f',width:3},marker:{size:9},text:records.map(row=>row.mean_vote_pct===null?'':`${fmt(row.mean_vote_pct,1)}%`),textposition:'top center',hovertemplate:'%{x}: %{y:.2f}% average vote<extra></extra>'}
   ],{...baseLayout,xaxis:{...baseLayout.xaxis,tickmode:'array',tickvals:dashboard.meta.years},yaxis:{...baseLayout.yaxis,title:'Declared general seats'},yaxis2:{title:'Average vote share (%)',overlaying:'y',side:'right',gridcolor:'rgba(0,0,0,0)'},legend:{orientation:'h',y:1.12,x:0},annotations:records.filter(row=>row.boycotted).map(row=>({x:row.year,y:0,yref:'y',text:'Boycotted',showarrow:true,arrowhead:0,ay:-32,font:{color:'#a52e28',size:11}}))},plotConfig);
   const latestYear=dashboard.meta.years.at(-1);const candidates=[];
-  Object.values(dashboard.constituencies).forEach(item=>item.party_history.filter(row=>row.year===latestYear&&row.party_group===party).forEach(row=>candidates.push(row)));
+  Object.values(dashboard.constituencies).forEach(item=>item.party_history.filter(row=>row.year===latestYear&&partyPageKey(row.party_group)===party).forEach(row=>candidates.push(row)));
   const strongest=candidates.filter(row=>row.vote_pct!==null).sort((a,b)=>b.vote_pct-a.vote_pct).slice(0,18).reverse();
   Plotly.react('partyStrongholds',[{x:strongest.map(row=>row.vote_pct),y:strongest.map(row=>row.constituency_label),type:'bar',orientation:'h',marker:{color:colorForParty(party)},customdata:strongest.map(row=>[row.candidate_name,row.candidate_rank]),hovertemplate:'%{y}<br>%{customdata[0]} · rank %{customdata[1]}<br>%{x:.2f}%<extra></extra>'}],{...baseLayout,margin:{t:20,r:25,b:48,l:120},xaxis:{...baseLayout.xaxis,title:`Candidate vote share in ${latestYear} (%)`}},plotConfig);
 }
